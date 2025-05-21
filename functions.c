@@ -1,8 +1,19 @@
+/*
+Файл functions.c содержит реализации всех функций, объявленных в library.h.
+Каждая функция выполняет конкретную задачу:
+вывод меню, сохранение данных, сортировка, добавление, удаление и редактирование записей.
+Все функции используют локализацию на русский язык для корректного отображения текста.
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
 #include "library.h"
 
+/*
+Функция print_menu
+Выводит на экран меню с опциями программы на русском языке.
+*/
 void print_menu() {
 	setlocale(LC_ALL, "Russian");
 	printf("\nМеню:\n");
@@ -17,6 +28,15 @@ void print_menu() {
 	printf("Ваш выбор: ");
 }
 
+/*
+Функция save_to_file
+Сохраняет массив записей (структур) в текстовый файл с указанным именем.
+Параметры:
+- ar: массив записей (структур).
+- count: количество записей в массиве.
+- filename: имя файла для сохранения.
+Если файл не удалось открыть, выводит сообщение об ошибке.
+*/
 void save_to_file(record ar[], int count, const char* filename) {
 	setlocale(LC_ALL, "Russian");
 	FILE *f_out = fopen(filename, "w");
@@ -35,6 +55,15 @@ void save_to_file(record ar[], int count, const char* filename) {
 	fclose(f_out);
 }
 
+/*
+Функция save_monthly_summary
+Создает и сохраняет в файл сводку по месяцам (суммарное количество книг за каждый месяц).
+Сортирует сводку по году и месяцу.
+Параметры:
+- ar: массив записей (структур).
+- count: количество записей в массиве.
+- filename: имя файла для сохранения сводки.
+*/
 void save_monthly_summary(record ar[], int count, const char* filename) {
 	setlocale(LC_ALL, "Russian");
 	FILE *f_out = fopen(filename, "w");
@@ -45,6 +74,8 @@ void save_monthly_summary(record ar[], int count, const char* filename) {
 	fprintf(f_out, "Месяц года Количество\n");
 	monthly_summary summaries[AR_SIZE];
 	int summary_count = 0;
+	
+	//Подсчет книг по месяцам и годам.
 	for (int i = 0; i < count; ++i) {
 		int month = ar[i].issue_date.month;
 		int year = ar[i].issue_date.year;
@@ -63,6 +94,8 @@ void save_monthly_summary(record ar[], int count, const char* filename) {
 			summary_count++;
 		}
 	}
+	
+	//Сортировка сводки по году и месяцу.
 	for (int i = 0; i < summary_count - 1; ++i) {
 		int imin = i;
 		for (int j = i + 1; j < summary_count; ++j) {
@@ -77,6 +110,8 @@ void save_monthly_summary(record ar[], int count, const char* filename) {
 			summaries[imin] = t;
 		}
 	}
+	
+	//Запись отсортированной сводки в файл.
 	for (int i = 0; i < summary_count; ++i) {
 		fprintf(f_out, "%d.%d %d\n",
 			summaries[i].month,
@@ -86,6 +121,13 @@ void save_monthly_summary(record ar[], int count, const char* filename) {
 	fclose(f_out);
 }
 
+/*
+Функция ar_print
+Выводит на экран список всех записей в массиве.
+Параметры:
+- ar: массив записей (структур).
+- count: количество записей в массиве.
+*/
 void ar_print(record ar[], int count) {
 	setlocale(LC_ALL, "Russian");
 	printf("\nТекущий список записей:\n");
@@ -99,12 +141,25 @@ void ar_print(record ar[], int count) {
 	}
 }
 
+/*
+Функция swap
+Меняет местами две записи (используется в сортировках).
+Параметры:
+- pa, pb: указатели на записи для обмена.
+*/
 void swap(record *pa, record *pb) {
 	record t = *pa;
 	*pa = *pb;
 	*pb = t;
 }
 
+/*
+Функция sort_by_month
+Сортирует массив записей по месяцу выдачи.
+Параметры:
+- ar: массив записей (структур).
+- len: длина массива (количество записей).
+*/
 void sort_by_month(record ar[], int len) {
 	for (int i = 0; i < len - 1; ++i) {
 		int imin = i;
@@ -119,6 +174,13 @@ void sort_by_month(record ar[], int len) {
 	}
 }
 
+/*
+Функция sort_by_surname
+Сортирует массив записей по фамилии в алфавитном порядке.
+Параметры:
+- ar: массив записей (структур).
+- len: длина массива (количество записей).
+*/
 void sort_by_surname(record ar[], int len) {
 	for (int i = 0; i < len - 1; ++i) {
 		int imin = i;
@@ -133,6 +195,13 @@ void sort_by_surname(record ar[], int len) {
 	}
 }
 
+/*
+Функция sort_by_books
+Сортирует массив записей по количеству книг (по возрастанию).
+Параметры:
+- ar: массив записей (структур).
+- len: длина массива (количество записей).
+*/
 void sort_by_books(record ar[], int len) {
 	for (int i = 0; i < len - 1; ++i) {
 		int imin = i;
@@ -147,6 +216,13 @@ void sort_by_books(record ar[], int len) {
 	}
 }
 
+/*
+Функция add_record
+Добавляет новую запись в массив, запрашивая данные у пользователя.
+Параметры:
+- ar: массив записей (структур).
+- count: указатель на количество записей (увеличивается при добавлении).
+*/
 void add_record(record ar[], int *count) {
 	setlocale(LC_ALL, "Russian");
 	if (*count >= AR_SIZE) {
@@ -164,6 +240,13 @@ void add_record(record ar[], int *count) {
 	printf("Запись успешно добавлена.\n");
 }
 
+/*
+Функция delete_record
+Удаляет запись из массива по указанной фамилии, заменяя её последней записью массива.
+Параметры:
+- ar: массив записей (структур).
+- count: указатель на количество записей (уменьшается при удалении).
+*/
 void delete_record(record ar[], int *count) {
 	setlocale(LC_ALL, "Russian");
 	char surname[20];
@@ -173,9 +256,7 @@ void delete_record(record ar[], int *count) {
 	for (int i = 0; i < *count; i++) {
 		if (strcmp(ar[i].surname, surname) == 0) {
 			found = 1;
-			for (int j = i; j < *count - 1; j++) {
-				ar[j] = ar[j + 1];
-			}
+			ar[i] = ar[*count - 1];
 			(*count)--;
 			printf("Запись с фамилией %s удалена.\n", surname);
 			break;
@@ -186,6 +267,13 @@ void delete_record(record ar[], int *count) {
 	}
 }
 
+/*
+Функция edit_record
+Редактирует существующую запись по указанной фамилии, запрашивая новые данные.
+Параметры:
+- ar: массив записей (структур).
+- count: количество записей в массиве.
+*/
 void edit_record(record ar[], int count) {
 	setlocale(LC_ALL, "Russian");
 	char surname[20];
